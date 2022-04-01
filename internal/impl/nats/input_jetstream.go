@@ -370,9 +370,20 @@ func (j *jetStreamReader) Close(ctx context.Context) error {
 	return nil
 }
 
+const (
+	Header_MessageId    = "X-message-id"
+	Header_MessageAttrs = "X-message-attributes"
+)
+
 func convertMessage(m *nats.Msg) (*service.Message, service.AckFunc, error) {
 	msg := service.NewMessage(m.Data)
 	msg.MetaSet("nats_subject", m.Subject)
+	if m.Header != nil && len(m.Header) > 0 {
+		msgId := m.Header.Get(Header_MessageId)
+		if msgId != "" {
+			msg.MetaSet("nats_message_id", msgId)
+		}
+	}
 
 	return msg, func(ctx context.Context, res error) error {
 		if res == nil {
