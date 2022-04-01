@@ -158,6 +158,26 @@ func (j *jetStreamOutput) disconnect() {
 }
 
 //------------------------------------------------------------------------------
+// type MessageAttributeValue struct {
+// 	DataType    string `json:"D" xml:"DataType,omitempty"`
+// 	StringValue string `json:"S,omitempty" xml:"StringValue,omitempty"`
+// 	BinaryValue []byte `json:"B,omitempty" xml:"BinaryValue,omitempty"`
+// }
+//
+// type MessageAttribute struct {
+// 	Name  string                `json:"N" xml:"Name,omitempty"`
+// 	Value MessageAttributeValue `json:"V" xml:"Value,omitempty"`
+// }
+//
+// type MessageAttributes struct {
+// 	Attributes []*MessageAttribute `json:"A"`
+// 	MD5        string              `json:"H"`
+// }
+//
+// const (
+// 	Header_MessageId    = "X-message-id"
+// 	Header_MessageAttrs = "X-message-attributes"
+// )
 
 func (j *jetStreamOutput) Write(ctx context.Context, msg *service.Message) error {
 	j.connMut.Lock()
@@ -172,6 +192,32 @@ func (j *jetStreamOutput) Write(ctx context.Context, msg *service.Message) error
 	if err != nil {
 		return err
 	}
+
+	// jsmsg := nats.NewMsg(subject)
+	// natsSubject, subjectFound := msg.MetaGet("nats_subject")
+	// attrs := &MessageAttributes{
+	// 	Attributes: []*MessageAttribute{},
+	// 	MD5:        "4242",
+	// }
+	// if subjectFound {
+	// 	natsSubject = strings.TrimPrefix(natsSubject, "T.")
+	// 	attrs.Attributes = append(attrs.Attributes, &MessageAttribute{
+	// 		Name: "Topic",
+	// 		Value: MessageAttributeValue{
+	// 			DataType:    "String",
+	// 			StringValue: natsSubject,
+	// 		},
+	// 	})
+	// }
+	// jsonAttrs, err := json.Marshal(attrs)
+	// if err != nil {
+	// 	return err
+	// }
+	// jsmsg.Data = msgBytes
+	// //jsmsg.Header.Set(Header_MessageId, MessageId)
+	// jsmsg.Header.Set(Header_MessageAttrs, string(jsonAttrs))
+	//
+	// _, err = jCtx.PublishMsg(jsmsg)
 
 	_, err = jCtx.Publish(subject, msgBytes)
 	return err
